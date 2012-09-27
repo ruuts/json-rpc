@@ -80,7 +80,8 @@ module JsonRpc
     def self.validate request
       return 200 if request["jsonrpc"] == Version and
         request["method"].kind_of?(String) and
-        request["method"] != ""
+        request["method"] != "" and
+        request["id"].kind_of?(Integer)
       raise error :invalid_request, request["id"], "invalid request: #{request.inspect}"
     end
 
@@ -93,7 +94,7 @@ module JsonRpc
           req = Rack::Request.new(env)
           obj = req.params
           obj["id"] = obj["id"].to_i
-          obj["params"] = obj["params"] ? JSON::parse(obj["params"]) : []
+          obj["params"] = obj["result"] ? JSON::parse(obj.delete("result")) : []
           obj
         else
           raise error :invalid_request, nil, "unsupported method #{env["REQUEST_METHOD"]} params: #{obj.inspect}"
@@ -120,7 +121,7 @@ module JsonRpc
     end
 
     def self.forge_response result, id = nil
-      {"jsonrpc" => Version, "id" => id.to_i, "result" => result}.to_json
+      {"jsonrpc" => Version, "id" => id, "result" => result}.to_json
     end
 
     # The class RpcDeferrable is useful helps you to build a Json Rpc server

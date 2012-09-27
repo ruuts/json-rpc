@@ -20,12 +20,12 @@ class All < Test::Unit::TestCase
 
   def test_get_parse
     opts = {:method => 'GET'}
-    rs = Rpc::parse Rack::MockRequest.env_for("/?method=subtract&params=[42,23]&id=1&jsonrpc=2.0")
+    rs = Rpc::parse Rack::MockRequest.env_for("/?jsonrpc=2.0&method=subtract&result=[42,23]&id=1")
     assert_equal ReqSubtract, rs
   end
 
   def test_invalid_json_post_parse
-    req_string = '{"jsonrpc": "2.0", "method": "subtract", "params": [42, 2'
+    req_string = '{"jsonrpc": "2.0", "method": "subtract", "result": [42, 2'
 
     # POST REQUEST
     opts = {:input => req_string,
@@ -37,15 +37,15 @@ class All < Test::Unit::TestCase
   end
 
   def test_validate
-    req_hash = { "jsonrpc" => "2.0", "method" => "s", "params" => 1, "id" => 22 }
+    req_hash = { "jsonrpc" => "2.0", "method" => "s", "result" => 1, "id" => 22 }
     assert_nothing_raised {
       Rpc::validate req_hash
     }
-    req_hash = { "method" => "s", "params" => 1, "id" => 22 }
+    req_hash = { "method" => "s", "result" => 1, "id" => 22 }
     assert_raise(Rpc::Error) {
       Rpc::validate req_hash
     }
-    req_hash = { "jsonrpc" => "2.0", "method" => "s", "params" => 1, "id" => "22" }
+    req_hash = { "jsonrpc" => "2.0", "method" => "s", "result" => 1, "id" => "22" }
     assert_raise(Rpc::Error) {
       Rpc::validate req_hash
     }
@@ -54,6 +54,6 @@ class All < Test::Unit::TestCase
   def test_response_forging
     assert_equal({"jsonrpc" => "2.0", "result" => 12, "id" => 7},
                  JSON.parse(Rpc::forge_response(12, 7)))
-    assert_equal(nil, Rpc::forge_response(12))
+    assert_equal({"jsonrpc" => "2.0", "result" => 12, "id" => nil}, JSON.parse(Rpc::forge_response(12)))
   end
 end

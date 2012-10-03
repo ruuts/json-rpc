@@ -93,6 +93,7 @@ module JsonRpc
         when /^(GET|HEAD)$/
           req = Rack::Request.new(env)
           obj = req.params
+          obj["jsonrpc"] = "2.0"
           obj["id"] = obj["id"].to_i
           obj["params"] = obj["result"] ? JSON::parse(obj.delete("result")) : []
           obj

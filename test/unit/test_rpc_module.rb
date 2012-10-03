@@ -22,6 +22,9 @@ class All < Test::Unit::TestCase
     opts = {:method => 'GET'}
     rs = Rpc::parse Rack::MockRequest.env_for("/?jsonrpc=2.0&method=subtract&result=[42,23]&id=1")
     assert_equal ReqSubtract, rs
+
+    rs = Rpc::parse Rack::MockRequest.env_for("/?method=subtract&result=[42,23]&id=1")
+    assert_equal ReqSubtract, rs
   end
 
   def test_invalid_json_post_parse

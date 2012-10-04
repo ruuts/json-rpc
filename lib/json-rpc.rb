@@ -87,19 +87,21 @@ module JsonRpc
 
     def self.parse env
       begin
-        case env["REQUEST_METHOD"]
+        request_obj = case env["REQUEST_METHOD"]
         when "POST"
           JSON.parse(env["rack.input"].read)
         when /^(GET|HEAD)$/
           req = Rack::Request.new(env)
           obj = req.params
-          obj["jsonrpc"] = "2.0"
           obj["id"] = obj["id"].to_i
-          obj["params"] = obj["result"] ? JSON::parse(obj.delete("result")) : []
+          obj["result"] = JSON::parse(obj["result"]) if obj["result"]
           obj
         else
           raise error :invalid_request, nil, "unsupported method #{env["REQUEST_METHOD"]} params: #{obj.inspect}"
         end
+        request_obj["jsonrpc"]  = "2.0"
+        request_obj["params"]   = request_obj["result"] ? request_obj.delete("result") : [] if request_obj["result"]
+        request_obj
 
       rescue JSON::ParserError => e
         raise error :parse_error, nil, "JSON parsing error: #{e}"

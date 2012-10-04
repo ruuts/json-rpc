@@ -109,7 +109,7 @@ module JsonRpc
     end
 
     def self.route request, ctrl
-      method, params = Prefix + request["method"], request["params"], request
+      method, params = Prefix + request["method"], request
 
       unless ctrl.respond_to? method
         raise error :method_not_found, request["id"], "method `#{method}` not found"

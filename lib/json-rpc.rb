@@ -115,7 +115,7 @@ module JsonRpc
         raise error :method_not_found, request["id"], "method `#{method}` not found"
       end
 
-      result = ctrl.send(method, *params)
+      result = ctrl.send(method, params)
       if result.is_a? AsyncResult
         result.id = request["id"]
         return result
